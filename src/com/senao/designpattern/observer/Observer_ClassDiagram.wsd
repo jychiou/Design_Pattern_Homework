@@ -1,0 +1,19 @@
+@startuml Observer_ClassDiagram
+
+interface IObserver {
+	+update()
+}
+
+class DigitalClock implements IObserver {
+	+update()
+}
+
+class Clock {
+	+register()
+	+deRegister()
+	-onTick()
+}
+
+Clock .> IObserver
+
+@enduml
