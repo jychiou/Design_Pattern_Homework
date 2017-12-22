@@ -2,7 +2,9 @@ package com.senao.designpattern.observer;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Hashtable;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 目標類別
@@ -14,26 +16,67 @@ import java.util.List;
  *
  */
 public class Clock implements Runnable  {
-
-	// 觀察者的清單
-	private List<IObserver> observers = new ArrayList<IObserver>();
+	
+	public static final String SUBJECT_SECOND = "second";	// 每秒
+	
+	public static final String SUBJECT_MINUTE = "minute";	// 每分鐘
+	
+	public static final String SUBJECT_PUNCTUALLY = "punctually";	// 整點
+	
+	// 主題 -> 觀察者清單
+	private Map<String, List<IObserver>> observerMap = new Hashtable<String, List<IObserver>>();
 	
 	/**
 	 * 添附(Attach)：新增觀察者到串鍊內，以追蹤目標物件的變化
-	 * @param observer
+	 * 
+	 * @param subject 主題
+	 * @param observer 觀察者
 	 */
-	public void register(IObserver observer) {
+	public void register(String subject, IObserver observer) {
+		List<IObserver> observers = observerMap.get(subject);
+		
+		if(observers==null) {
+			observers = new ArrayList<IObserver>();
+			observerMap.put(subject, observers);
+		}
+		
 		if(!observers.contains(observer))
 			observers.add(observer);
 	}
 	
 	/**
 	 * 解附(Detach)：將已經存在的觀察者從串鍊中移除。
-	 * @param observer
+	 * 
+	 * @param subject 主題
+	 * @param observer 觀察者
 	 */
-	public void deRegister(IObserver observer) {
+	public void deRegister(String subject, IObserver observer) {
+		List<IObserver> observers = observerMap.get(subject);
+		
+		if(observers==null)
+			return;
+		
 		if (observers.contains(observer))
 			observers.remove(observer);
+	}
+	
+	/**
+	 * 通知(Notify)：利用觀察者所提供的更新函式來通知此目標已經產生變化。
+	 * 
+	 * @param subject 主題
+	 * @param hours 時
+	 * @param minutes 分
+	 * @param seconds 秒
+	 */
+	private void notifyObserver(String subject, int hours, int minutes, int seconds) {
+		List<IObserver> observers = observerMap.get(subject);
+		
+		if(observers==null)
+			return;
+		
+		for(IObserver observer : observers) {
+			observer.update(subject, hours, minutes, seconds);
+		}
 	}
 	
 	/**
@@ -46,8 +89,16 @@ public class Clock implements Runnable  {
 		int minutes = rightNow.get(Calendar.MINUTE);
 		int seconds = rightNow.get(Calendar.SECOND);
 
-		for(IObserver observer : observers) {
-			observer.update(hours, minutes, seconds);
+		// 每秒
+		notifyObserver(SUBJECT_SECOND, hours, minutes, seconds);
+		
+		if(seconds==0) {
+			// 每分鐘
+			notifyObserver(SUBJECT_MINUTE, hours, minutes, seconds);
+	
+			if(minutes==0)
+				// 整點
+				notifyObserver(SUBJECT_PUNCTUALLY, hours, minutes, seconds);
 		}
 	}
 	
@@ -78,8 +129,14 @@ public class Clock implements Runnable  {
 		// 觀察者類別
 		IObserver digitalClock = new DigitalClock();
 		
-		// 新增觀察者目標物件
-		clock.register(digitalClock);
+		// 新增觀察者目標物件(主題：每秒)
+		clock.register(SUBJECT_SECOND, digitalClock);
+		
+		// 新增觀察者目標物件(主題：每分鐘)
+		clock.register(SUBJECT_MINUTE, digitalClock);		
+		
+		// 新增觀察者目標物件(主題：整點)
+		clock.register(SUBJECT_PUNCTUALLY, digitalClock);
 		
 		Thread t = new Thread(clock);
         t.start();

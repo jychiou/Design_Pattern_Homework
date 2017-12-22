@@ -13,9 +13,10 @@ public interface IObserver {
 	
 	/**
 	 * 
-	 * @param hours
-	 * @param minutes
-	 * @param seconds
+	 * @param subject 主題
+	 * @param hours 時
+	 * @param minutes 分
+	 * @param seconds 秒
 	 */
-	void update(int hours, int minutes, int seconds);
+	void update(String subject, int hours, int minutes, int seconds);
 }

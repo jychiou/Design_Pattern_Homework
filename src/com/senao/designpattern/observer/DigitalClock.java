@@ -14,8 +14,16 @@ package com.senao.designpattern.observer;
 public class DigitalClock implements IObserver {
 
 	@Override
-	public void update(int hours, int minutes, int seconds) {
-		System.out.println("現在時間:" + hours + "點 " + minutes + "分 " + seconds + "秒");
+	public void update(String subject, int hours, int minutes, int seconds) {
+		
+		if(subject.equals(Clock.SUBJECT_SECOND))
+			System.out.println("現在時間:" + hours + "點 " + minutes + "分 " + seconds + "秒");
+		
+		else if(subject.equals(Clock.SUBJECT_MINUTE))
+			System.out.println("現在時間:" + hours + "點 " + minutes + "分整 ");
+		
+		else if(subject.equals(Clock.SUBJECT_PUNCTUALLY))
+			System.out.println("現在時間:" + hours + "點整 ");
 	}
 
 }

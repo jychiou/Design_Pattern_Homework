@@ -14,6 +14,6 @@ class Clock {
 	-onTick()
 }
 
-Clock .> IObserver
+Clock -> IObserver
 
 @enduml
